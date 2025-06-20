@@ -17,17 +17,20 @@ const database = firebase.database();
 
 // Authentication State Observer
 auth.onAuthStateChanged((user) => {
+    const currentPath = window.location.pathname;
     if (user) {
         // User is signed in
-        const currentPath = window.location.pathname;
-        if (currentPath.includes('index.html') || currentPath.includes('signup.html')) {
+        if (currentPath.includes('index.html') || currentPath.includes('signup.html') || currentPath.includes('login.html')) {
             window.location.href = 'pages/dashboard.html';
         }
     } else {
         // User is signed out
-        const currentPath = window.location.pathname;
+        // Redirect to login if on dashboard or transactions page
+        if (currentPath.includes('dashboard.html') || currentPath.includes('transactions.html')) {
+            window.location.href = '../login.html';
+        }
         if (currentPath.includes('pages/')) {
-            window.location.href = '../index.html';
+            window.location.href = '../login.html';
         }
     }
 });
