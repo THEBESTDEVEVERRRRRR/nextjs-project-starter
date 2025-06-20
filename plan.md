@@ -1,7 +1,7 @@
 # Banking Website Development Plan
 
 ## Project Overview
-Creating a modern banking website using HTML5 with Firebase authentication and database integration.
+Creating a Tush Bank website using HTML5 with Firebase authentication and database integration.
 
 ## Project Structure
 ```

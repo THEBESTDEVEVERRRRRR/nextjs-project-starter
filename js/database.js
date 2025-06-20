@@ -47,6 +47,7 @@ async function createTransaction(senderId, recipientId, amount, type, descriptio
         // Create transaction record
         const transactionRef = database.ref('transactions').push();
         const transaction = {
+            transactionId: transactionRef.key,
             senderId,
             recipientId,
             amount,

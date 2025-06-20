@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Modern Banking - Welcome</title>
+    <title>Tush Bank - Welcome</title>
     <link rel="stylesheet" href="css/styles.css" />
     <style>
         /* Additional landing page specific styles */
@@ -15,8 +15,23 @@
             background-color: var(--background-color);
             color: var(--text-color);
         }
+        .bank-logo {
+            height: 40px;
+            margin-right: 1rem;
+            vertical-align: middle;
+            transition: filter 0.2s;
+        }
+        @media (prefers-color-scheme: dark) {
+            .bank-logo {
+                content: url('https://i.ibb.co/wF5k1t3v/tblogowhite.png');
+            }
+            nav.landing-nav, .hero, .feature-card, footer {
+                background: var(--background-color) !important;
+                color: var(--text-color) !important;
+            }
+        }
         nav.landing-nav {
-            background: white;
+            background: var(--background-color);
             padding: 1rem 2rem;
             box-shadow: var(--card-shadow);
             display: flex;
@@ -50,7 +65,7 @@
             align-items: center;
             text-align: center;
             padding: 4rem 2rem;
-            background: white;
+            background: var(--background-color);
             margin: 2rem auto;
             max-width: 900px;
             border-radius: 1rem;
@@ -92,7 +107,7 @@
             padding: 0 2rem;
         }
         .feature-card {
-            background: white;
+            background: var(--background-color);
             padding: 2rem;
             border-radius: 1rem;
             box-shadow: var(--card-shadow);
@@ -107,7 +122,7 @@
             font-size: 1rem;
         }
         footer {
-            background: white;
+            background: var(--background-color);
             padding: 1rem 2rem;
             text-align: center;
             box-shadow: var(--card-shadow);
@@ -126,7 +141,7 @@
 </head>
 <body>
     <nav class="landing-nav">
-        <div class="brand">Modern Banking</div>
+        <img src="https://i.ibb.co/G4KHQNw2/tblogoblack.png" alt="Bank Logo" class="bank-logo" />
         <ul>
             <li><a href="login.html">Login</a></li>
             <li><a href="signup.html">Sign Up</a></li>
@@ -134,7 +149,7 @@
     </nav>
 
     <section class="hero">
-        <h1>Welcome to Modern Banking</h1>
+        <h1>Welcome to Tush Bank</h1>
         <p>Your trusted partner for secure, fast, and easy banking. Manage your finances anytime, anywhere.</p>
         <a href="signup.html" class="btn-primary landing-cta">Get Started</a>
     </section>
@@ -155,7 +170,8 @@
     </section>
 
     <footer>
-        &copy; 2024 Modern Banking. All rights reserved.
+        &copy; 2024 Tush Bank. All rights reserved.<br>
+        <a href="tos.html">Terms of Service</a> &middot; <a href="privacy.html">Privacy Policy</a>
     </footer>
 </body>
 </html>

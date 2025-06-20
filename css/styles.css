@@ -1,4 +1,4 @@
-/* Modern Banking Website Styles */
+/* Tush Bank Website Styles */
 
 /* Reset and Base Styles */
 * {
@@ -16,6 +16,42 @@
     --success-color: #22c55e;
     --border-color: #e2e8f0;
     --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --primary-color: #60a5fa;
+        --secondary-color: #2563eb;
+        --background-color: #0f172a;
+        --text-color: #f1f5f9;
+        --error-color: #f87171;
+        --success-color: #4ade80;
+        --border-color: #334155;
+        --card-shadow: 0 4px 16px -1px rgb(0 0 0 / 0.4);
+    }
+    body, .dashboard-container, .auth-container, .dashboard-nav, .balance-card, .transactions-section, .action-btn, .modal-content, .feature-card, footer {
+        background: var(--background-color) !important;
+        color: var(--text-color) !important;
+    }
+    .dashboard-nav, .balance-card, .transactions-section, .action-btn, .modal-content, .feature-card, .auth-container, footer {
+        box-shadow: var(--card-shadow) !important;
+    }
+    .btn-secondary {
+        background-color: #334155 !important;
+        color: var(--text-color) !important;
+    }
+    .btn-secondary:hover {
+        background-color: #1e293b !important;
+    }
+    input, select, textarea {
+        background: #1e293b !important;
+        color: var(--text-color) !important;
+        border-color: var(--border-color) !important;
+    }
+    table, th, td {
+        background: transparent !important;
+        color: var(--text-color) !important;
+    }
 }
 
 body {
@@ -221,6 +257,25 @@ body {
     transform: translateY(-2px);
 }
 
+.quick-actions .action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+}
+
+.action-icon {
+    display: block;
+    font-size: 2.2rem;
+    line-height: 1;
+}
+
+.action-icon.accent {
+    color: var(--primary-color);
+}
+
 /* Transactions */
 .transactions-section {
     background: white;
@@ -316,4 +371,17 @@ th {
 
 .mb-2 {
     margin-bottom: 2rem;
+}
+
+.bank-logo {
+    height: 40px;
+    margin-right: 1rem;
+    vertical-align: middle;
+    transition: filter 0.2s;
+}
+
+@media (prefers-color-scheme: dark) {
+    .bank-logo {
+        content: url('https://i.ibb.co/wF5k1t3v/tblogowhite.png');
+    }
 }

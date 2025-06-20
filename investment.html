@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invest in Stocks - Tush Bank</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .investment-container { max-width: 900px; margin: 3rem auto; background: var(--background-color); padding: 2rem; border-radius: 1rem; box-shadow: var(--card-shadow); }
+        h1 { color: var(--primary-color); margin-bottom: 2rem; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 2rem; }
+        th, td { padding: 1rem; border-bottom: 1px solid var(--border-color); text-align: left; }
+        th { background: var(--background-color); color: var(--primary-color); }
+        .invest-btn { padding: 0.5rem 1.5rem; border-radius: 0.5rem; background: var(--primary-color); color: #fff; border: none; cursor: pointer; }
+        .invest-btn:hover { background: var(--secondary-color); }
+    </style>
+</head>
+<body>
+    <div class="investment-container">
+        <h1>Invest in Stocks</h1>
+        <div id="userAssets" style="margin-bottom:2rem;"></div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Symbol</th>
+                    <th>Name</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="stocksTableBody">
+                <tr><td colspan="5">Loading stock data...</td></tr>
+            </tbody>
+        </table>
+        <a href="pages/dashboard.html" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script>
+    // Firebase config must match your project
+    const firebaseConfig = {
+        apiKey: "AIzaSyAj4Rr05dA3nbm7yZh7OqK34tCuKNL0cSY",
+        authDomain: "tbank-d5fed.firebaseapp.com",
+        projectId: "tbank-d5fed",
+        storageBucket: "tbank-d5fed.appspot.com",
+        messagingSenderId: "336243193775",
+        appId: "1:336243193775:web:1241a3b9a9e243be51a15a",
+        databaseURL: "https://tbank-d5fed-default-rtdb.asia-southeast1.firebasedatabase.app/"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const database = firebase.database();
+
+    // Replace with your published Google Sheet CSV URL
+    const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTrgDt8duTJJsEEESISfiDYFzVDIkkzHalCdr4CxBLnyiKM_QWSc2btct84R8ia0c3MXW7_H7v3gila/pub?gid=0&single=true&output=csv';
+
+    let stocks = [];
+    let user = null;
+    let userProfile = null;
+
+    async function fetchStocks() {
+        const res = await fetch(SHEET_CSV_URL);
+        const csv = await res.text();
+        const rows = csv.trim().split('\n').map(r => r.split(','));
+        const [header, ...data] = rows;
+        return data.map(row => ({
+            name: row[0],
+            symbol: row[1],
+            price: parseFloat(row[2])
+        }));
+    }
+
+    async function getUserProfile(uid) {
+        const snap = await database.ref('users/' + uid).once('value');
+        return snap.val();
+    }
+    async function updateUserBalance(uid, newBalance) {
+        await database.ref('users/' + uid).update({ balance: newBalance });
+    }
+
+    async function getUserStocks(uid) {
+        const snap = await database.ref('userStocks/' + uid).once('value');
+        return snap.val() || {};
+    }
+
+    async function updateUserStock(uid, symbol, name, price, delta) {
+        const ref = database.ref('userStocks/' + uid + '/' + symbol);
+        const snap = await ref.once('value');
+        let holding = snap.val();
+        if (!holding) holding = { symbol, name, quantity: 0, avgPrice: 0 };
+        let newQty = holding.quantity + delta;
+        if (newQty < 0) newQty = 0;
+        let newAvg = holding.avgPrice;
+        if (delta > 0) {
+            // Weighted average price
+            newAvg = ((holding.quantity * holding.avgPrice) + (delta * price)) / (holding.quantity + delta);
+        }
+        if (newQty === 0) {
+            await ref.remove();
+        } else {
+            await ref.set({ symbol, name, quantity: newQty, avgPrice: newAvg });
+        }
+    }
+
+    async function renderStocks() {
+        const tableBody = document.getElementById('stocksTableBody');
+        stocks = await fetchStocks();
+        const userStocks = user ? await getUserStocks(user.uid) : {};
+        tableBody.innerHTML = stocks.map(stock => {
+            const holding = userStocks[stock.symbol] || { quantity: 0 };
+            const inputId = `qty-${stock.symbol}`;
+            return `
+                <tr>
+                    <td>${stock.symbol}</td>
+                    <td>${stock.name}</td>
+                    <td>$${stock.price.toFixed(2)}</td>
+                    <td><input type="number" id="${inputId}" min="1" value="1" style="width:60px;"></td>
+                    <td>
+                        <button class="invest-btn" onclick="investStock('${stock.symbol}')">Invest</button>
+                        <button class="invest-btn" style="background:var(--error-color);margin-left:0.5rem;" onclick="sellStock('${stock.symbol}')">Sell</button>
+                        <div style="font-size:0.9em;color:var(--primary-color);margin-top:0.3em;">Owned: ${holding.quantity}</div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    async function renderUserAssets() {
+        if (!user) return;
+        const assetsDiv = document.getElementById('userAssets');
+        const userStocks = await getUserStocks(user.uid);
+        let balanceHtml = '';
+        if (userProfile) {
+            balanceHtml = `<div style="margin-bottom:0.5em;"><b>Balance:</b> $${parseFloat(userProfile.balance).toFixed(2)}</div>`;
+        }
+        if (!userStocks || Object.keys(userStocks).length === 0) {
+            assetsDiv.innerHTML = balanceHtml + '<b>Your Stock Assets:</b> <span style="color:var(--error-color);">None</span>';
+            return;
+        }
+        let html = balanceHtml + '<b>Your Stock Assets:</b><table style="width:100%;margin-top:0.5em;"><tr><th>Symbol</th><th>Name</th><th>Quantity</th><th>Avg. Price</th></tr>';
+        for (const symbol in userStocks) {
+            const s = userStocks[symbol];
+            html += `<tr><td>${s.symbol}</td><td>${s.name}</td><td>${s.quantity}</td><td>$${parseFloat(s.avgPrice).toFixed(2)}</td></tr>`;
+        }
+        html += '</table>';
+        assetsDiv.innerHTML = html;
+    }
+
+    window.investStock = async function(symbol) {
+        if (!user) { alert('Please log in.'); return; }
+        const stock = stocks.find(s => s.symbol === symbol);
+        if (!stock) return;
+        const qty = Math.max(1, parseInt(document.getElementById(`qty-${symbol}`).value) || 1);
+        userProfile = await getUserProfile(user.uid);
+        const totalCost = stock.price * qty;
+        if (userProfile.balance < totalCost) {
+            alert('Insufficient balance!');
+            return;
+        }
+        await updateUserBalance(user.uid, userProfile.balance - totalCost);
+        await updateUserStock(user.uid, stock.symbol, stock.name, stock.price, qty);
+        userProfile.balance -= totalCost;
+        await renderStocks();
+        await renderUserAssets();
+        alert('Invested in ' + qty + ' share(s) of ' + stock.symbol + '!');
+    }
+    window.sellStock = async function(symbol) {
+        if (!user) { alert('Please log in.'); return; }
+        const stock = stocks.find(s => s.symbol === symbol);
+        if (!stock) return;
+        const qty = Math.max(1, parseInt(document.getElementById(`qty-${symbol}`).value) || 1);
+        userProfile = await getUserProfile(user.uid);
+        const userStocks = await getUserStocks(user.uid);
+        const holding = userStocks[stock.symbol] || { quantity: 0 };
+        if (holding.quantity < qty) {
+            alert('You do not own enough shares to sell!');
+            return;
+        }
+        await updateUserBalance(user.uid, userProfile.balance + stock.price * qty);
+        await updateUserStock(user.uid, stock.symbol, stock.name, stock.price, -qty);
+        userProfile.balance += stock.price * qty;
+        await renderStocks();
+        await renderUserAssets();
+        alert('Sold ' + qty + ' share(s) of ' + stock.symbol + '!');
+    }
+
+    auth.onAuthStateChanged(async u => {
+        user = u;
+        if (user) userProfile = await getUserProfile(user.uid);
+        await renderStocks();
+        await renderUserAssets();
+    });
+    </script>
+</body>
+</html>

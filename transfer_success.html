@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transfer Successful - Tush Bank</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .success-container {
+            max-width: 500px;
+            margin: 5rem auto;
+            background: var(--background-color);
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: var(--card-shadow);
+            text-align: center;
+        }
+        .success-icon {
+            font-size: 3rem;
+            color: var(--success-color);
+            margin-bottom: 1rem;
+        }
+        .transaction-id {
+            font-size: 1.1rem;
+            color: var(--primary-color);
+            margin: 1.5rem 0 0.5rem 0;
+            word-break: break-all;
+        }
+        .btn {
+            margin-top: 2rem;
+            width: auto;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+    <div class="success-container">
+        <div class="success-icon"><i class="fa-solid fa-circle-check"></i></div>
+        <h1>Transfer Successful!</h1>
+        <p>Your money has been sent successfully.</p>
+        <div class="transaction-id" id="transactionIdBox">
+            Transaction ID: <span id="transactionId">...</span>
+        </div>
+        <a href="pages/dashboard.html" class="btn btn-primary">Back to Dashboard</a>
+    </div>
+    <script>
+        // Get transactionId from URL
+        const params = new URLSearchParams(window.location.search);
+        const transactionId = params.get('tid');
+        if (transactionId) {
+            document.getElementById('transactionId').textContent = transactionId;
+        }
+    </script>
+</body>
+</html>
