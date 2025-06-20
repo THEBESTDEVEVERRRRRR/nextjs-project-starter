@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Modern Banking - Welcome</title>
+    <link rel="stylesheet" href="css/styles.css" />
+    <style>
+        /* Additional landing page specific styles */
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+        nav.landing-nav {
+            background: white;
+            padding: 1rem 2rem;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        nav.landing-nav .brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        nav.landing-nav ul {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+        }
+        nav.landing-nav ul li a {
+            text-decoration: none;
+            color: var(--text-color);
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        nav.landing-nav ul li a:hover {
+            color: var(--primary-color);
+        }
+        .hero {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            margin: 2rem auto;
+            max-width: 900px;
+            border-radius: 1rem;
+            box-shadow: var(--card-shadow);
+        }
+        .hero h1 {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        .hero p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            color: var(--text-color);
+        }
+        .btn-primary.landing-cta {
+            max-width: 200px;
+            font-size: 1.25rem;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            transition: background-color 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-primary.landing-cta:hover {
+            background-color: var(--secondary-color);
+        }
+        .features {
+            max-width: 900px;
+            margin: 0 auto 4rem auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            padding: 0 2rem;
+        }
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: var(--card-shadow);
+            text-align: center;
+        }
+        .feature-card h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        .feature-card p {
+            color: var(--text-color);
+            font-size: 1rem;
+        }
+        footer {
+            background: white;
+            padding: 1rem 2rem;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+        @media (max-width: 600px) {
+            .hero h1 {
+                font-size: 2.25rem;
+            }
+            .hero p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="landing-nav">
+        <div class="brand">Modern Banking</div>
+        <ul>
+            <li><a href="login.html">Login</a></li>
+            <li><a href="signup.html">Sign Up</a></li>
+        </ul>
+    </nav>
+
+    <section class="hero">
+        <h1>Welcome to Modern Banking</h1>
+        <p>Your trusted partner for secure, fast, and easy banking. Manage your finances anytime, anywhere.</p>
+        <a href="signup.html" class="btn-primary landing-cta">Get Started</a>
+    </section>
+
+    <section class="features">
+        <div class="feature-card">
+            <h3>Secure Transactions</h3>
+            <p>Bank with confidence knowing your data and money are protected with top-notch security measures.</p>
+        </div>
+        <div class="feature-card">
+            <h3>Easy Transfers</h3>
+            <p>Send money quickly and easily to anyone, anytime, with just a few clicks.</p>
+        </div>
+        <div class="feature-card">
+            <h3>24/7 Support</h3>
+            <p>Our dedicated support team is here to help you around the clock with any questions or issues.</p>
+        </div>
+    </section>
+
+    <footer>
+        &copy; 2024 Modern Banking. All rights reserved.
+    </footer>
+</body>
+</html>
