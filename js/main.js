@@ -1,14 +1,13 @@
 // Main Application Logic
 
 // DOM Elements
-const currentUser = firebase.auth().currentUser;
 const userName = document.getElementById('userName');
 const accountBalance = document.getElementById('accountBalance');
 const recentTransactions = document.getElementById('recentTransactions');
 const currentDate = document.getElementById('currentDate');
 
 // Initialize Dashboard
-async function initializeDashboard() {
+async function initializeDashboard(currentUser) {
     if (!currentUser) return;
 
     try {
@@ -34,11 +33,11 @@ async function initializeDashboard() {
         }
         
         // Load recent transactions
-        await loadRecentTransactions();
+        await loadRecentTransactions(currentUser);
         
         // Load transaction statistics if on transactions page
         if (window.location.pathname.includes('transactions.html')) {
-            await loadTransactionStats();
+            await loadTransactionStats(currentUser);
         }
     } catch (error) {
         showMessage(error.message, 'error');
@@ -46,14 +45,14 @@ async function initializeDashboard() {
 }
 
 // Load Recent Transactions
-async function loadRecentTransactions() {
+async function loadRecentTransactions(currentUser) {
     if (!currentUser || !recentTransactions) return;
 
     try {
         const transactions = await dbOperations.getUserTransactions(currentUser.uid, 5);
         
         recentTransactions.innerHTML = transactions.length ? 
-            transactions.map(transaction => createTransactionElement(transaction)).join('') :
+            transactions.map(transaction => createTransactionElement(transaction, currentUser)).join('') :
             '<p class="text-center">No recent transactions</p>';
     } catch (error) {
         showMessage('Error loading transactions', 'error');
@@ -61,7 +60,7 @@ async function loadRecentTransactions() {
 }
 
 // Create Transaction Element
-function createTransactionElement(transaction) {
+function createTransactionElement(transaction, currentUser) {
     const isReceived = transaction.recipientId === currentUser.uid;
     const amount = formatCurrency(transaction.amount);
     const date = new Date(transaction.timestamp).toLocaleDateString();
@@ -120,7 +119,7 @@ if (transferForm) {
             
             // Close modal and refresh dashboard
             closeModal('transferModal');
-            await initializeDashboard();
+            await initializeDashboard(currentUser);
             showMessage('Transfer successful!', 'success');
         } catch (error) {
             showMessage(error.message, 'error');
@@ -129,7 +128,7 @@ if (transferForm) {
 }
 
 // Transaction Statistics
-async function loadTransactionStats() {
+async function loadTransactionStats(currentUser) {
     if (!currentUser) return;
     
     try {
@@ -209,6 +208,50 @@ async function loadFilteredTransactions() {
     }
 }
 
+// Deposit Money Modal
+function showDepositModal() {
+    const modal = document.getElementById('depositModal');
+    if (modal) {
+        modal.style.display = 'flex';
+    }
+}
+
+// Handle Deposit Form
+const depositForm = document.getElementById('depositForm');
+if (depositForm) {
+    depositForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const amount = parseFloat(document.getElementById('depositAmount').value);
+        if (!amount || amount <= 0) {
+            showMessage('Enter a valid amount', 'error');
+            return;
+        }
+        // Open credit card deposit page in new tab with amount and user id
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                const url = `/credit_card_deposit.html?amount=${encodeURIComponent(amount)}&uid=${encodeURIComponent(user.uid)}`;
+                window.open(url, '_blank');
+            }
+        });
+        closeModal('depositModal');
+    });
+}
+
+// Listen for deposit completion from credit_card_deposit.html
+window.addEventListener('message', async (event) => {
+    if (event.data && event.data.type === 'deposit-success') {
+        const { amount, uid } = event.data;
+        if (amount > 0 && uid) {
+            // Fetch current balance, add deposit, update in Firebase
+            const profile = await dbOperations.getUserProfile(uid);
+            const newBalance = (profile.balance || 0) + amount;
+            await dbOperations.updateBalance(uid, newBalance);
+            showMessage('Deposit successful!', 'success');
+            initializeDashboard(uid);
+        }
+    }
+});
+
 // Utility Functions
 function formatCurrency(amount) {
     return new Intl.NumberFormat('en-US', {
@@ -219,7 +262,12 @@ function formatCurrency(amount) {
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', () => {
-    initializeDashboard();
+    // Use onAuthStateChanged to ensure user is available
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+            initializeDashboard(user);
+        }
+    });
     
     // Close modals when clicking outside
     window.onclick = (event) => {
