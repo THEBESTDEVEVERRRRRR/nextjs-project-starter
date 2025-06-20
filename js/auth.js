@@ -1,13 +1,13 @@
 // Firebase Configuration
 const firebaseConfig = {
     // TODO: Replace with your Firebase config
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_STORAGE_BUCKET",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID",
-    databaseURL: "YOUR_DATABASE_URL"
+    apiKey: "AIzaSyAj4Rr05dA3nbm7yZh7OqK34tCuKNL0cSY",
+    authDomain: "tbank-d5fed.firebaseapp.com",
+    projectId: "tbank-d5fed",
+    storageBucket: "tbank-d5fed.firebasestorage.app",
+    messagingSenderId: "336243193775",
+    appId: "1:336243193775:web:1241a3b9a9e243be51a15a",
+    databaseURL: "https://tbank-d5fed-default-rtdb.asia-southeast1.firebasedatabase.app/"
 };
 
 // Initialize Firebase
