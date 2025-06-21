@@ -47,6 +47,7 @@ if (loginForm) {
         try {
             await auth.signInWithEmailAndPassword(email, password);
             showMessage('Login successful!', 'success');
+            window.location.href = 'pages/dashboard.html'; // Redirect after login
         } catch (error) {
             showMessage(error.message, 'error');
         }
