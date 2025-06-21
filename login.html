@@ -40,5 +40,56 @@
     <!-- Custom JS -->
     <script src="js/auth.js"></script>
     <script src="js/main.js"></script>
+
+    <!-- Debug Panel -->
+    <div id="debugPanel" style="background:#222;color:#fff;padding:1em;margin:1em 0;display:none;font-size:0.95em;border-radius:6px">
+        <b>Debug Info</b>
+        <div id="debugAuthState"></div>
+        <div id="debugLastError"></div>
+        <button id="debugShowUser" style="margin-top:0.5em">Show Current User in Console</button>
+        <button id="debugShowConfig" style="margin-top:0.5em">Show Firebase Config</button>
+    </div>
+    <script>
+    // Show debug panel if ?debug=1 in URL
+    if (window.location.search.includes('debug=1')) {
+        document.getElementById('debugPanel').style.display = 'block';
+    }
+    // Firebase Auth state
+    if (window.firebase && firebase.auth) {
+        firebase.auth().onAuthStateChanged(function(user) {
+            document.getElementById('debugAuthState').textContent = user ? `Auth state: Logged in as ${user.email}` : 'Auth state: Not logged in';
+        });
+    }
+    // Listen for login errors
+    var debugLoginForm = document.getElementById('loginForm');
+    if (debugLoginForm) {
+        debugLoginForm.addEventListener('submit', function(e) {
+            setTimeout(function() {
+                if (window.lastLoginError) {
+                    document.getElementById('debugLastError').textContent = 'Last error: ' + window.lastLoginError;
+                }
+            }, 500);
+        });
+    }
+    // Patch auth.js to capture errors
+    (function() {
+        const origAlert = window.alert;
+        window.alert = function(msg) {
+            window.lastLoginError = msg;
+            origAlert(msg);
+        };
+    })();
+    // Debug buttons
+    document.getElementById('debugShowUser').onclick = function() {
+        if (window.firebase && firebase.auth) {
+            console.log('Current user:', firebase.auth().currentUser);
+        }
+    };
+    document.getElementById('debugShowConfig').onclick = function() {
+        if (window.firebase && firebase.apps && firebase.apps.length > 0) {
+            console.log('Firebase config:', firebase.apps[0].options);
+        }
+    };
+    </script>
 </body>
 </html>
