@@ -57,12 +57,16 @@
                         <span class="action-icon accent"><i class="fa-solid fa-barcode"></i></span>
                         Pay with Code
                     </button>
+                    <button class="action-btn" onclick="window.location.href='bankcard.html'">
+                        <span class="action-icon accent"><i class="fa-solid fa-id-card"></i></span>
+                        View Bank Card
+                    </button>
                 </div>
             </section>
 
             <!-- Recent Transactions -->
             <section class="recent-transactions">
-                <h2>Recent Transactions</h2>
+                <h2>Transactions in the Last 7 Days</h2>
                 <div class="transactions-list" id="recentTransactions">
                     <!-- Transactions will be populated by JavaScript -->
                 </div>
@@ -149,6 +153,38 @@
     <script src="../js/database.js"></script>
     <script src="../js/auth.js"></script>
     <script src="../js/main.js"></script>
+
+    <script>
+    // Filter and display only transactions from the last 7 days
+    function filterRecentTransactions(transactions) {
+        const now = new Date();
+        const sevenDaysAgo = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6, 0, 0, 0, 0);
+        return transactions.filter(tx => {
+            if (!tx.date) return false;
+            const txDate = new Date(tx.date);
+            return txDate >= sevenDaysAgo && txDate <= now;
+        });
+    }
+
+    // Patch main.js's renderRecentTransactions if it exists
+    if (typeof renderRecentTransactions === 'function') {
+        const origRender = renderRecentTransactions;
+        window.renderRecentTransactions = function(transactions) {
+            origRender(filterRecentTransactions(transactions));
+        };
+    }
+    // If using initializeDashboard, patch it to filter transactions
+    if (typeof initializeDashboard === 'function') {
+        const origInit = initializeDashboard;
+        window.initializeDashboard = function(user) {
+            origInit(user);
+            // If transactions are loaded async, patch after load
+            if (window.recentTransactions && Array.isArray(window.recentTransactions)) {
+                window.recentTransactions = filterRecentTransactions(window.recentTransactions);
+            }
+        };
+    }
+    </script>
 
     <!-- Dashboard Auth State Init -->
     <script>
