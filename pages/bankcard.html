@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Bank Card</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 32px;
+            justify-items: center;
+            align-items: center;
+            min-height: 80vh;
+            background: var(--background-color, #181c20);
+            padding: 48px 0;
+        }
+        .bank-card {
+            width: 350px;
+            height: 220px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #2d3a4b 60%, #4e8cff 100%);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            color: #fff;
+            padding: 32px 28px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            font-family: 'Inter', Arial, sans-serif;
+            position: relative;
+            margin: 0 auto;
+        }
+        .bank-logo-card {
+            width: 60px;
+            position: absolute;
+            top: 24px;
+            right: 28px;
+        }
+        .card-number {
+            font-size: 1.5em;
+            letter-spacing: 3px;
+            margin-bottom: 18px;
+        }
+        .card-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1em;
+            align-items: flex-end;
+        }
+        .card-label {
+            font-size: 0.8em;
+            color: #b0c4de;
+        }
+        .back-btn {
+            margin-top: 32px;
+            display: block;
+            background: #4e8cff;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 24px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .back-btn:hover {
+            background: #2d3a4b;
+        }
+        .cardholder-block {
+            font-size: 1em;
+            margin-bottom: 0;
+            margin-top: 0;
+            padding-left: 2px;
+        }
+        /* Place cardholder under expiry */
+        .card-details > div:first-child {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .card-details > div:first-child .cardholder-block {
+            margin-top: 8px;
+        }
+        .cvv-value {
+            user-select: none;
+        }
+        .card-bottom-row {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: 1px;
+            gap: 12px;
+        }
+        .expiry-block, .cardholder-block, .cvv-block {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .cvv-block {
+            align-items: flex-end;
+            text-align: right;
+        }
+        .cardholder-block {
+            font-size: 1em;
+            margin-bottom: 0;
+            margin-top: 0;
+            padding-left: 2px;
+            min-width: 90px;
+        }
+        .empty-card {
+            background: rgba(255,255,255,0.07);
+            border: 2px dashed #4e8cff;
+            color: #4e8cff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+        }
+        .plus-btn {
+            font-size: 2.5em;
+            font-weight: bold;
+            user-select: none;
+        }
+        .add-card-box {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #222;
+            color: #fff;
+            border-radius: 10px;
+            padding: 18px 24px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+            z-index: 2;
+            text-align: center;
+        }
+        .add-card-input {
+            width: 140px;
+            padding: 6px 10px;
+            border-radius: 5px;
+            border: 1px solid #4e8cff;
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+        .add-card-confirm {
+            background: #4e8cff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 6px 18px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+        .add-card-confirm:hover {
+            background: #2d3a4b;
+        }
+        /* Refined style for debit tag */
+        .debit-tag {
+            position: absolute;
+            top: -22px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff;
+            color: #2d3a4b;
+            font-weight: bold;
+            font-size: 0.98em;
+            padding: 3px 22px 3px 22px;
+            border-radius: 14px 14px 18px 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+            letter-spacing: 2px;
+            z-index: 3;
+            border: 2px solid #4e8cff;
+            text-shadow: 0 1px 2px #e0eaff;
+            line-height: 1.2;
+        }
+    </style>
+</head>
+<body>
+    <div class="card-container" id="cardsGrid">
+        <!-- Cards will be generated here -->
+    </div>
+    <div style="text-align:center;">
+        <button class="back-btn" onclick="window.location.href='dashboard.html'">Back to Dashboard</button>
+    </div>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script>
+    // Firebase config (should match your project)
+    var firebaseConfig = {
+        apiKey: "AIzaSyAj4Rr05dA3nbm7yZh7OqK34tCuKNL0cSY",
+        authDomain: "tbank-d5fed.firebaseapp.com",
+        projectId: "tbank-d5fed",
+        storageBucket: "tbank-d5fed.appspot.com",
+        messagingSenderId: "336243193775",
+        appId: "1:336243193775:web:1241a3b9a9e243be51a15a",
+        databaseURL: "https://tbank-d5fed-default-rtdb.asia-southeast1.firebasedatabase.app/"
+    };
+    if (!window.firebase.apps || !window.firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    var auth = firebase.auth();
+    var database = firebase.database();
+    // Deterministic card number per user (last 12 digits from uid, padded)
+    function userCardNumber(uid) {
+        let base = '534141'; // Visa prefix
+        let digits = uid.replace(/[^0-9]/g, '');
+        while (digits.length < 10) digits += Math.floor(Math.random() * 10); // Pad to 10 digits
+        return (base + digits.slice(0, 10)).replace(/(.{4})/g, '$1 ').trim();
+    }
+    function userExpiry() {
+        const now = new Date();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const year = String((now.getFullYear() % 100) + 4); // 4 years from now
+        return `${month}/${year}`;
+    }
+    function userCVV(uid) {
+        // Simple hash for demo
+        let hash = 0;
+        for (let i = 0; i < uid.length; i++) hash += uid.charCodeAt(i);
+        return String((hash % 900) + 100);
+    }
+    // Assign a unique card number to each account and store it in the user's profile if not present
+    async function getOrCreateUserCardNumber(user) {
+        const userRef = database.ref('users/' + user.uid);
+        let profile = null;
+        try {
+            const snap = await userRef.once('value');
+            profile = snap.val();
+        } catch {}
+        if (profile && profile.cardNumber) {
+            return profile.cardNumber;
+        }
+        // Generate a new unique card number (BIN + random, check for uniqueness)
+        let cardNumber;
+        let isUnique = false;
+        while (!isUnique) {
+            cardNumber = '534141' + Array.from({length:10}, () => Math.floor(Math.random()*10)).join('');
+            // Check uniqueness in all users
+            const usersSnap = await database.ref('users').orderByChild('cardNumber').equalTo(cardNumber).once('value');
+            isUnique = !usersSnap.exists();
+        }
+        // Save to user profile
+        await userRef.update({ cardNumber });
+        return cardNumber;
+    }
+    function formatCardNumber(cardNumber) {
+        // Remove spaces, split into two rows of 8 digits each
+        cardNumber = cardNumber.replace(/\s/g, '');
+        return cardNumber.slice(0, 4) + ' ' + cardNumber.slice(4, 8) + '\n' + cardNumber.slice(8, 12) + ' ' + cardNumber.slice(12, 16);
+    }
+    function createUserCard(user, profile, cardNumber) {
+        return `<div class="bank-card" onmouseenter="this.querySelector('.cvv-value').style.filter='none'" onmouseleave="this.querySelector('.cvv-value').style.filter='blur(8px)'"><span class='debit-tag'>DEBIT</span>
+            <img src='https://i.imgur.com/CIVTFgP.png' alt='Bank Logo' class='bank-logo-card' />
+            <div class='card-label'>Card Number</div>
+            <div class='card-number' id='cardNumber' style='white-space:pre-line; font-size:1.4em; line-height:1.2; cursor:pointer;' title='Click to copy card number' onclick='copyCardNumber(event, "${cardNumber}")'>${formatCardNumber(cardNumber)}</div>
+            <div class='card-bottom-row'>
+                <div class='expiry-block'>
+                    <span class='card-label'>Valid Thru</span><br>
+                    <span>${userExpiry()}</span>
+                </div>
+                <div class='cardholder-block'>
+                    <span class='card-label'>Cardholder</span><br>
+                    <span style='font-weight:600;'>${profile && profile.fullName ? profile.fullName : user.email}</span>
+                </div>
+                <div class='cvv-block'>
+                    <span class='card-label'>CVV</span><br>
+                    <span class='cvv-value' style='filter: blur(8px); transition: filter 0.3s;'>${userCVV(user.uid)}</span>
+                </div>
+            </div>
+        </div>`;
+    }
+    // Render a 2x3 grid of cards (6 slots)
+    function renderCardsGrid(user, profile, cardNumber) {
+        let cardsHTML = '';
+        // Only one real card for now, rest are empty slots
+        for (let i = 0; i < 6; i++) {
+            if (i === 0) {
+                cardsHTML += createUserCard(user, profile, cardNumber, true);
+            } else {
+                cardsHTML += `<div class="bank-card empty-card" onclick="showAddCardBox(this)">
+                    <div class='plus-btn'>+</div>
+                </div>`;
+            }
+        }
+        document.getElementById('cardsGrid').innerHTML = cardsHTML;
+    }
+    // Show add card box
+    function showAddCardBox(cardEl) {
+        if (cardEl.querySelector('.add-card-box')) return;
+        const box = document.createElement('div');
+        box.className = 'add-card-box';
+        box.innerHTML = `<input type='text' placeholder='Card name...' class='add-card-input'><br><button class='add-card-confirm'>Add</button>`;
+        cardEl.appendChild(box);
+        cardEl.querySelector('.add-card-input').focus();
+        cardEl.querySelector('.add-card-confirm').onclick = function(e) {
+            e.stopPropagation();
+            box.innerHTML = '<span style="color:var(--success-color)">Apply for Tush Bank Credit Card Now!</span>';
+        };
+    }
+    // Add this function to handle copying
+    function copyCardNumber(e, cardNumber) {
+        e.stopPropagation();
+        navigator.clipboard.writeText(cardNumber.replace(/\s/g, ''));
+        const el = e.currentTarget;
+        const old = el.textContent;
+        el.textContent = 'Copied!';
+        setTimeout(() => { el.textContent = formatCardNumber(cardNumber); }, 1000);
+    }
+    auth.onAuthStateChanged(async function(user) {
+        if (!user) {
+            window.location.href = '../login.html';
+            return;
+        }
+        // Fetch user profile and card number
+        let profile = null;
+        let cardNumber = null;
+        try {
+            const snap = await database.ref('users/' + user.uid).once('value');
+            profile = snap.val();
+            cardNumber = profile && profile.cardNumber ? profile.cardNumber : await getOrCreateUserCardNumber(user);
+        } catch {
+            cardNumber = await getOrCreateUserCardNumber(user);
+        }
+        renderCardsGrid(user, profile, cardNumber);
+    });
+    </script>
+</body>
+</html>
