@@ -139,7 +139,7 @@
             assetsDiv.innerHTML = balanceHtml + '<b>Your Stock Assets:</b> <span style="color:var(--error-color);">None</span>';
             return;
         }
-        let html = balanceHtml + '<b>Your Stock Assets:</b><table style="width:100%;margin-top:0.5em;"><tr><th>Symbol</th><th>Name</th><th>Quantity</th><th>Avg. Price</th></tr>';
+        let html = balanceHtml + '<b>Your Stock Assets:</b><table style="width:100%;margin-top:0.5em;"><tr><th>Symbol</th><th>Name</th><th>Quantity</th><th>Buy Price</th></tr>';
         for (const symbol in userStocks) {
             const s = userStocks[symbol];
             html += `<tr><td>${s.symbol}</td><td>${s.name}</td><td>${s.quantity}</td><td>$${parseFloat(s.avgPrice).toFixed(2)}</td></tr>`;
