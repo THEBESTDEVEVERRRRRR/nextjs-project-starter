@@ -102,5 +102,72 @@
         }
     });
     </script>
+
+    <!-- Running Balance Calculation for Transaction Table -->
+    <script>
+    function renderTransactionsWithBalance(transactions, initialBalance) {
+        const tbody = document.getElementById('transactionsTableBody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        if (!Array.isArray(transactions) || transactions.length === 0) {
+            const row = document.createElement('tr');
+            row.innerHTML = `<td colspan="5" style="text-align:center;color:#888;">No transactions found.</td>`;
+            tbody.appendChild(row);
+            return;
+        }
+        // Sort oldest to newest for running balance calculation
+        const sorted = [...transactions].filter(tx => tx && tx.date && !isNaN(new Date(tx.date))).sort((a, b) => new Date(a.date) - new Date(b.date));
+        // Calculate running balance from 0, then display newest first
+        let runningBalances = [];
+        let balance = 0;
+        for (let i = 0; i < sorted.length; i++) {
+            const tx = sorted[i];
+            let amount = parseFloat(tx.amount) || 0;
+            if (tx.type === 'Sent' || tx.type === 'sent' || tx.type === 'debit') {
+                balance -= Math.abs(amount);
+            } else if (tx.type === 'Received' || tx.type === 'received' || tx.type === 'credit') {
+                balance += Math.abs(amount);
+            } else if (tx.type === 'Deposit' || tx.type === 'deposit') {
+                balance += Math.abs(amount);
+            } else if (tx.type === 'Withdraw' || tx.type === 'withdraw') {
+                balance -= Math.abs(amount);
+            }
+            runningBalances.push({ tx, balance: balance });
+        }
+        // Display newest first
+        for (let i = runningBalances.length - 1; i >= 0; i--) {
+            const { tx, balance } = runningBalances[i];
+            let amount = parseFloat(tx.amount) || 0;
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${tx.date ? new Date(tx.date).toLocaleDateString() : ''}</td>
+                <td>${tx.description || ''}<br><span style='font-size:0.85em;color:#888;'>Txn ID: ${tx.id || ''}</span></td>
+                <td>${tx.type || ''}</td>
+                <td style="color:${amount < 0 ? '#e74c3c' : '#27ae60'};">${amount < 0 ? '-' : ''}$${Math.abs(amount).toFixed(2)}</td>
+                <td>$${balance.toFixed(2)}</td>
+            `;
+            tbody.appendChild(row);
+        }
+    }
+
+    // Get transactions and render with running balance from zero
+    async function loadAndRenderTransactionsWithBalance() {
+        const user = window.currentUser;
+        if (!user) return;
+        let transactions = [];
+        try {
+            const txSnap = await firebase.database().ref('transactions/' + user.uid).once('value');
+            const txObj = txSnap.val();
+            if (txObj) {
+                transactions = Object.values(txObj);
+            }
+        } catch {}
+        renderTransactionsWithBalance(transactions, 0);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        loadAndRenderTransactionsWithBalance();
+    });
+    </script>
 </body>
 </html>
