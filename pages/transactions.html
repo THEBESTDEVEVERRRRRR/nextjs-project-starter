@@ -81,5 +81,26 @@
     <script src="../js/database.js"></script>
     <script src="../js/auth.js"></script>
     <script src="../js/main.js"></script>
+
+    <!-- Transactions Auth State Init -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.firebase && firebase.auth) {
+            firebase.auth().onAuthStateChanged(function(user) {
+                if (user) {
+                    window.currentUser = user;
+                    if (typeof loadTransactionStats === 'function') {
+                        loadTransactionStats(user);
+                    }
+                    if (typeof loadFilteredTransactions === 'function') {
+                        loadFilteredTransactions();
+                    }
+                } else {
+                    window.location.href = '../login.html';
+                }
+            });
+        }
+    });
+    </script>
 </body>
 </html>
