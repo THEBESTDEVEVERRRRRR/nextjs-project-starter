@@ -41,6 +41,43 @@
     <script src="js/auth.js"></script>
     <script src="js/main.js"></script>
 
+    <!-- Inline Login Auth Handler -->
+    <script>
+    // Only run on login.html
+    document.addEventListener('DOMContentLoaded', function() {
+        // Firebase config (should match your project)
+        var firebaseConfig = {
+            apiKey: "AIzaSyAj4Rr05dA3nbm7yZh7OqK34tCuKNL0cSY",
+            authDomain: "tbank-d5fed.firebaseapp.com",
+            projectId: "tbank-d5fed",
+            storageBucket: "tbank-d5fed.appspot.com",
+            messagingSenderId: "336243193775",
+            appId: "1:336243193775:web:1241a3b9a9e243be51a15a",
+            databaseURL: "https://tbank-d5fed-default-rtdb.asia-southeast1.firebasedatabase.app/"
+        };
+        // Initialize Firebase if not already
+        if (!window.firebase.apps || !window.firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        var auth = firebase.auth();
+        var loginForm = document.getElementById('loginForm');
+        if (loginForm) {
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                var email = document.getElementById('email').value;
+                var password = document.getElementById('password').value;
+                auth.signInWithEmailAndPassword(email, password)
+                    .then(function() {
+                        window.location.href = '/pages/dashboard.html';
+                    })
+                    .catch(function(error) {
+                        alert(error.message);
+                    });
+            });
+        }
+    });
+    </script>
+
     <!-- Debug Panel -->
     <div id="debugPanel" style="background:#222;color:#fff;padding:1em;margin:1em 0;display:none;font-size:0.95em;border-radius:6px">
         <b>Debug Info</b>
