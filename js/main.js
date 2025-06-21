@@ -164,14 +164,14 @@ async function loadFilteredTransactions() {
     const month = filterMonth.value;
     try {
         let transactions = await dbOperations.getUserTransactions(window.currentUser.uid, 50);
-        
+        // Sort transactions by timestamp descending (newest first)
+        transactions = transactions.sort((a, b) => b.timestamp - a.timestamp);
         // Apply filters
         if (type !== 'all') {
             transactions = transactions.filter(t => 
                 type === 'sent' ? t.senderId === currentUser.uid : t.recipientId === currentUser.uid
             );
         }
-        
         if (month) {
             const [year, monthNum] = month.split('-');
             transactions = transactions.filter(t => {
@@ -180,11 +180,25 @@ async function loadFilteredTransactions() {
                        date.getMonth() === parseInt(monthNum) - 1;
             });
         }
-        
-        // Update transactions table
-        const tableBody = document.getElementById('transactionsTableBody');
-        if (tableBody) {
-            tableBody.innerHTML = transactions.map(t => `
+        // Get user's current balance
+        const profile = await dbOperations.getUserProfile(window.currentUser.uid);
+        let runningBalance = profile.balance || 0;
+        // Calculate running balance for each transaction (newest to oldest)
+        const rows = [];
+        for (let i = 0; i < transactions.length; i++) {
+            const t = transactions[i];
+            // Save current balance for this transaction
+            t._displayBalance = runningBalance;
+            // Subtract/add for next transaction
+            if (t.senderId === window.currentUser.uid && t.recipientId === window.currentUser.uid) {
+                // Deposit (self-transfer)
+                // Do nothing, balance stays the same
+            } else if (t.senderId === window.currentUser.uid) {
+                runningBalance += t.amount; // add back sent amount for previous balance
+            } else if (t.recipientId === window.currentUser.uid) {
+                runningBalance -= t.amount; // subtract received amount for previous balance
+            }
+            rows.push(`
                 <tr>
                     <td>${new Date(t.timestamp).toLocaleDateString()}</td>
                     <td>${t.description || (t.senderId === window.currentUser.uid ? 
@@ -196,9 +210,13 @@ async function loadFilteredTransactions() {
                     <td class="${t.senderId === window.currentUser.uid ? 'negative' : 'positive'}">
                         ${t.senderId === window.currentUser.uid ? '-' : '+'}${formatCurrency(t.amount)}
                     </td>
-                    <td>${formatCurrency(t.balance || 0)}</td>
+                    <td>${formatCurrency(t._displayBalance)}</td>
                 </tr>
-            `).join('');
+            `);
+        }
+        const tableBody = document.getElementById('transactionsTableBody');
+        if (tableBody) {
+            tableBody.innerHTML = rows.join('');
         }
     } catch (error) {
         showMessage('Error loading transactions', 'error');
