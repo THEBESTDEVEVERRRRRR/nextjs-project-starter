@@ -47,7 +47,7 @@ if (loginForm) {
         try {
             await auth.signInWithEmailAndPassword(email, password);
             showMessage('Login successful!', 'success');
-            window.location.href = 'pages/dashboard.html'; // Redirect after login
+            window.location.href = '/pages/dashboard.html'; // Use absolute path for redirect
         } catch (error) {
             showMessage(error.message, 'error');
         }
