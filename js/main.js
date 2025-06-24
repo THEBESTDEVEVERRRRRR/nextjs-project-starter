@@ -257,12 +257,8 @@ window.addEventListener('message', async (event) => {
     if (event.data && event.data.type === 'deposit-success') {
         const { amount, uid } = event.data;
         if (amount > 0 && uid) {
-            // Fetch current balance, add deposit, update in Firebase
-            const profile = await dbOperations.getUserProfile(uid);
-            const newBalance = (profile.balance || 0) + amount;
-            await dbOperations.updateBalance(uid, newBalance);
-            // Record deposit as a transaction
-            await dbOperations.createTransaction(uid, uid, amount, "deposit", "Account deposit");
+            // Only record deposit as a positive transaction (createTransaction will update balance)
+            await dbOperations.createTransaction(uid, uid, amount, "Deposit", "Account deposit");
             showMessage('Deposit successful!', 'success');
             initializeDashboard(uid);
         }
