@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lending & Deposit with Interest - Tush Bank</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .lending-container { max-width: 700px; margin: 3rem auto; background: var(--background-color); padding: 2rem; border-radius: 1rem; box-shadow: var(--card-shadow); }
+        h1 { color: var(--primary-color); margin-bottom: 1.5rem; }
+        h2 { margin-top: 2rem; color: var(--secondary-color); }
+        label { display: block; margin-top: 1.2rem; color: var(--text-color); }
+        input, select { width: 100%; padding: 0.5rem; margin-top: 0.3rem; border-radius: 6px; border: 1px solid #ccc; }
+        .interest-result { margin-top: 1.5rem; font-size: 1.1em; color: var(--primary-color); }
+        .btn { margin-top: 1.2rem; padding: 0.7rem 2rem; border-radius: 6px; border: none; background: var(--primary-color); color: #fff; font-size: 1em; cursor: pointer; }
+        .btn:hover { background: var(--secondary-color); }
+    </style>
+</head>
+<body>
+    <div class="lending-container">
+        <h1>Lending & Deposit with Interest</h1>
+        <div id="currentStatus" style="background:rgba(0,0,0,0.04);padding:1rem 1.5rem;border-radius:0.7rem;margin-bottom:2rem;">
+            <h2 style="margin-top:0;font-size:1.2em;">Your Current Deposits & Loans</h2>
+            <div id="depositsList"><b>Deposits:</b> <span style="color:#888">Loading...</span></div>
+            <div id="loansList" style="margin-top:0.5rem;"><b>Loans:</b> <span style="color:#888">Loading...</span></div>
+        </div>
+        <h2>Deposit with Interest</h2>
+        <form id="depositInterestForm">
+            <label for="depositAmount">Deposit Amount</label>
+            <input type="number" id="depositAmount" min="1" step="0.01" required>
+            <label for="depositTerm">Term (months)</label>
+            <select id="depositTerm">
+                <option value="1">1 month (1% p.a.)</option>
+                <option value="3">3 months (2% p.a.)</option>
+                <option value="6">6 months (3% p.a.)</option>
+                <option value="12">12 months (4% p.a.)</option>
+                <option value="24">24 months (5% p.a.)</option>
+                <option value="36">36 months (6% p.a.)</option>
+                <option value="48">48 months (7% p.a.)</option>
+            </select>
+            <button type="submit" class="btn">Calculate Interest</button>
+        </form>
+        <div class="interest-result" id="depositResult"></div>
+        <h2 style="margin-top:2.5rem;">Request a Loan</h2>
+        <form id="loanForm">
+            <label for="loanAmount">Loan Amount</label>
+            <input type="number" id="loanAmount" min="100" step="1" required>
+            <label for="loanTerm">Term (months)</label>
+            <select id="loanTerm">
+                <option value="1">1 month (2% p.a.)</option>
+                <option value="3">3 months (4% p.a.)</option>
+                <option value="6">6 months (6% p.a.)</option>
+                <option value="12">12 months (7% p.a.)</option>
+                <option value="24">24 months (8% p.a.)</option>
+                <option value="36">36 months (9% p.a.)</option>
+                <option value="48">48 months (10% p.a.)</option>
+            </select>
+            <button type="submit" class="btn">Calculate Repayment</button>
+        </form>
+        <div class="interest-result" id="loanResult"></div>
+        <h2 style="margin-top:2.5rem;">Repay a Loan</h2>
+        <form id="repayLoanForm">
+            <label for="repayLoanSelect">Select Loan</label>
+            <select id="repayLoanSelect"></select>
+            <button type="submit" class="btn">Repay Loan</button>
+        </form>
+        <div class="interest-result" id="repayResult"></div>
+        <p style="margin-top:2rem;"><a href="dashboard.html">&larr; Back to Dashboard</a></p>
+    </div>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script>
+    // Initialize Firebase if not already initialized
+    if (!window.firebase || !firebase.apps || !firebase.apps.length) {
+        firebase.initializeApp({
+            apiKey: "AIzaSyAj4Rr05dA3nbm7yZh7OqK34tCuKNL0cSY",
+            authDomain: "tbank-d5fed.firebaseapp.com",
+            projectId: "tbank-d5fed",
+            storageBucket: "tbank-d5fed.appspot.com",
+            messagingSenderId: "336243193775",
+            appId: "1:336243193775:web:1241a3b9a9e243be51a15a",
+            databaseURL: "https://tbank-d5fed-default-rtdb.asia-southeast1.firebasedatabase.app/"
+        });
+    }
+    // Deposit with Interest Calculation and Add to Firebase
+    document.getElementById('depositInterestForm').onsubmit = async function(e) {
+        e.preventDefault();
+        const amount = parseFloat(document.getElementById('depositAmount').value);
+        const term = parseInt(document.getElementById('depositTerm').value);
+        let rate = 0.01;
+        if (term === 3) rate = 0.02;
+        if (term === 6) rate = 0.03;
+        if (term === 12) rate = 0.04;
+        if (term === 24) rate = 0.05;
+        if (term === 36) rate = 0.06;
+        if (term === 48) rate = 0.07;
+        const interest = amount * rate * (term/12);
+        const total = amount + interest;
+        document.getElementById('depositResult').innerHTML = `Interest earned: <b>$${interest.toFixed(2)}</b><br>Total after ${term} months: <b>$${total.toFixed(2)}</b>`;
+        // Ask user to confirm deposit
+        if (confirm(`Deposit $${amount.toFixed(2)} for ${term} months at ${(rate*100).toFixed(2)}% p.a.?`)) {
+            if (window.firebase && firebase.auth) {
+                const user = firebase.auth().currentUser;
+                if (user) {
+                    const userRef = firebase.database().ref('users/' + user.uid);
+                    // Check balance first
+                    const userSnap = await userRef.once('value');
+                    const profile = userSnap.val();
+                    let balance = profile && profile.balance ? parseFloat(profile.balance) : 0;
+                    if (balance < amount) {
+                        document.getElementById('depositResult').innerHTML = '<span style="color:red">Insufficient balance for this deposit.</span>';
+                        return;
+                    }
+                    // Deduct from balance (lock funds)
+                    await userRef.child('balance').transaction(bal => (parseFloat(bal) || 0) - amount);
+                    // Create deposit
+                    const depRef = firebase.database().ref('deposits/' + user.uid).push();
+                    await depRef.set({
+                        amount,
+                        term,
+                        rate,
+                        created: new Date().toISOString(),
+                        interest: parseFloat(interest.toFixed(2)),
+                        total: parseFloat(total.toFixed(2))
+                    });
+                    // Add to transactions for deposit (show as negative, since money is locked)
+                    const txRef = firebase.database().ref('transactions/' + user.uid).push();
+                    await txRef.set({
+                        amount: -amount,
+                        type: 'Deposit',
+                        description: `Deposit with interest (${term}m @ ${(rate*100).toFixed(2)}%)`,
+                        date: new Date().toISOString(),
+                        id: depRef.key,
+                        category: 'deposit-interest'
+                    });
+                    showCurrentDepositsAndLoans();
+                }
+            }
+        }
+    };
+    // Loan Repayment Calculation and Add to Firebase
+    document.getElementById('loanForm').onsubmit = async function(e) {
+        e.preventDefault();
+        const amount = parseFloat(document.getElementById('loanAmount').value);
+        const term = parseInt(document.getElementById('loanTerm').value);
+        let rate = 0.02;
+        if (term === 3) rate = 0.04;
+        if (term === 6) rate = 0.06;
+        if (term === 12) rate = 0.07;
+        if (term === 24) rate = 0.08;
+        if (term === 36) rate = 0.09;
+        if (term === 48) rate = 0.10;
+        const interest = amount * rate * (term/12);
+        const total = amount + interest;
+        document.getElementById('loanResult').innerHTML = `Total interest: <b>$${interest.toFixed(2)}</b><br>Total to repay after ${term} months: <b>$${total.toFixed(2)}</b>`;
+        // Ask user to confirm loan
+        if (confirm(`Request a loan of $${amount.toFixed(2)} for ${term} months at ${(rate*100).toFixed(2)}% p.a.?`)) {
+            if (window.firebase && firebase.auth) {
+                const user = firebase.auth().currentUser;
+                if (user) {
+                    const loanRef = firebase.database().ref('loans/' + user.uid).push();
+                    await loanRef.set({
+                        amount,
+                        term,
+                        rate,
+                        created: new Date().toISOString(),
+                        interest: parseFloat(interest.toFixed(2)),
+                        total: parseFloat(total.toFixed(2))
+                    });
+                    // Add to user balance (loan increases balance)
+                    const userRef = firebase.database().ref('users/' + user.uid);
+                    await userRef.child('balance').transaction(bal => (parseFloat(bal) || 0) + amount);
+                    // Add to transactions for loan (show as positive, since money is received)
+                    const txRef = firebase.database().ref('transactions/' + user.uid).push();
+                    await txRef.set({
+                        amount: amount,
+                        type: 'Loan',
+                        description: `Loan credited (${term}m @ ${(rate*100).toFixed(2)}%)`,
+                        date: new Date().toISOString(),
+                        id: loanRef.key,
+                        category: 'loan-credit'
+                    });
+                    showCurrentDepositsAndLoans();
+                }
+            }
+        }
+    };
+    // Repay Loan Logic
+    async function populateRepayLoanOptions() {
+        if (!window.firebase || !firebase.auth) return;
+        const user = firebase.auth().currentUser;
+        if (!user) return;
+        const uid = user.uid;
+        const select = document.getElementById('repayLoanSelect');
+        select.innerHTML = '';
+        const snap = await firebase.database().ref('loans/' + uid).once('value');
+        const loans = snap.val();
+        if (loans) {
+            Object.entries(loans).forEach(([key, loan]) => {
+                if (!loan.repaid) {
+                    const option = document.createElement('option');
+                    option.value = key;
+                    option.textContent = `Loan $${parseFloat(loan.amount).toFixed(2)} (${loan.term}m @ ${(loan.rate*100).toFixed(2)}%) - Total: $${parseFloat(loan.total).toFixed(2)}`;
+                    select.appendChild(option);
+                }
+            });
+        }
+    }
+    document.getElementById('repayLoanForm').onsubmit = async function(e) {
+        e.preventDefault();
+        const user = firebase.auth().currentUser;
+        if (!user) return;
+        const uid = user.uid;
+        const select = document.getElementById('repayLoanSelect');
+        const loanId = select.value;
+        if (!loanId) {
+            document.getElementById('repayResult').textContent = 'No loan selected.';
+            return;
+        }
+        const loanRef = firebase.database().ref('loans/' + uid + '/' + loanId);
+        const snap = await loanRef.once('value');
+        const loan = snap.val();
+        if (!loan || loan.repaid) {
+            document.getElementById('repayResult').textContent = 'Loan already repaid or not found.';
+            return;
+        }
+        // Check user balance
+        const userRef = firebase.database().ref('users/' + uid);
+        const userSnap = await userRef.once('value');
+        const profile = userSnap.val();
+        let balance = profile && profile.balance ? parseFloat(profile.balance) : 0;
+        if (balance < loan.total) {
+            document.getElementById('repayResult').textContent = 'Insufficient balance to repay this loan.';
+            return;
+        }
+        // Deduct from balance
+        await userRef.child('balance').transaction(bal => (parseFloat(bal) || 0) - parseFloat(loan.total));
+        // Mark loan as repaid
+        await loanRef.update({ repaid: true, repaidAt: new Date().toISOString() });
+        // Add to transactions
+        const txRef = firebase.database().ref('transactions/' + uid).push();
+        await txRef.set({
+            amount: -parseFloat(loan.total),
+            type: 'Loan Repayment',
+            description: `Repayment for loan (${loan.term}m @ ${(loan.rate*100).toFixed(2)}%)`,
+            date: new Date().toISOString(),
+            id: loanId,
+            category: 'loan-repayment'
+        });
+        document.getElementById('repayResult').textContent = 'Loan repaid successfully!';
+        showCurrentDepositsAndLoans();
+        populateRepayLoanOptions();
+    };
+    // Early withdrawal of a deposit
+    async function withdrawDepositEarly(depositId, amount) {
+        if (!window.firebase || !firebase.auth) return;
+        const user = firebase.auth().currentUser;
+        if (!user) return;
+        const uid = user.uid;
+        const depRef = firebase.database().ref('deposits/' + uid + '/' + depositId);
+        const depSnap = await depRef.once('value');
+        const dep = depSnap.val();
+        if (!dep || dep.paidOut || dep.withdrawnEarly) return;
+        // Credit only the principal (no interest)
+        const userRef = firebase.database().ref('users/' + uid);
+        await userRef.child('balance').transaction(bal => (parseFloat(bal) || 0) + parseFloat(amount));
+        // Mark deposit as withdrawn early
+        await depRef.update({ withdrawnEarly: true, withdrawnAt: new Date().toISOString() });
+        // Add to transactions for early withdrawal
+        const txRef = firebase.database().ref('transactions/' + uid).push();
+        await txRef.set({
+            amount: parseFloat(amount),
+            type: 'Deposit Early Withdrawal',
+            description: `Premature withdrawal of deposit (${dep.term}m @ ${(dep.rate*100).toFixed(2)}%)`,
+            date: new Date().toISOString(),
+            id: depositId,
+            category: 'deposit-early-withdrawal'
+        });
+        showCurrentDepositsAndLoans();
+    }
+    // Check and process matured deposits for the user
+    async function processMaturedDeposits() {
+        if (!window.firebase || !firebase.auth) return;
+        const user = firebase.auth().currentUser;
+        if (!user) return;
+        const uid = user.uid;
+        const depRef = firebase.database().ref('deposits/' + uid);
+        const snap = await depRef.once('value');
+        const deposits = snap.val();
+        if (!deposits) return;
+        const now = new Date();
+        for (const [key, dep] of Object.entries(deposits)) {
+            if (dep.paidOut) continue;
+            // Calculate maturity date
+            const created = new Date(dep.created);
+            const maturity = new Date(created);
+            maturity.setMonth(maturity.getMonth() + parseInt(dep.term));
+            if (now >= maturity) {
+                // Credit user balance with total (principal + interest)
+                const userRef = firebase.database().ref('users/' + uid);
+                await userRef.child('balance').transaction(bal => (parseFloat(bal) || 0) + parseFloat(dep.total));
+                // Mark deposit as paid out
+                await depRef.child(key).update({ paidOut: true, paidOutAt: now.toISOString() });
+                // Add to transactions for payout
+                const txRef = firebase.database().ref('transactions/' + uid).push();
+                await txRef.set({
+                    amount: parseFloat(dep.total),
+                    type: 'Deposit Maturity',
+                    description: `Deposit matured (${dep.term}m @ ${(dep.rate*100).toFixed(2)}%)`,
+                    date: now.toISOString(),
+                    id: key,
+                    category: 'deposit-maturity'
+                });
+            }
+        }
+    }
+    // Show current deposits and loans for the logged-in user
+    function showCurrentDepositsAndLoans() {
+        if (!window.firebase || !firebase.auth) return;
+        const user = firebase.auth().currentUser;
+        if (!user) {
+            // Try again after auth state is ready
+            firebase.auth().onAuthStateChanged(function(u) {
+                if (u) showCurrentDepositsAndLoans();
+            });
+            return;
+        }
+        const uid = user.uid;
+        // Fetch deposits
+        firebase.database().ref('deposits/' + uid).once('value').then(snap => {
+            const deposits = snap.val();
+            let html = '';
+            if (deposits) {
+                html = '<ul style="margin:0 0 0 1.2em;padding:0;">';
+                Object.entries(deposits).forEach(([key, dep]) => {
+                    let status = '';
+                    if (dep.paidOut) status = ' <span style="color:green">(Matured)</span>';
+                    else if (dep.withdrawnEarly) status = ' <span style="color:orange">(Withdrawn Early)</span>';
+                    else status = ` <button onclick="withdrawDepositEarly('`+key+`', '`+dep.amount+`')" style="margin-left:8px;font-size:0.9em;padding:2px 8px;">Withdraw Early</button>`;
+                    html += `<li>Amount: $${parseFloat(dep.amount).toFixed(2)}, Term: ${dep.term}m, Rate: ${(dep.rate*100).toFixed(2)}%${status}</li>`;
+                });
+                html += '</ul>';
+            } else {
+                html = '<span style="color:#888">None</span>';
+            }
+            document.getElementById('depositsList').innerHTML = '<b>Deposits:</b> ' + html;
+        });
+        // Fetch loans
+        firebase.database().ref('loans/' + uid).once('value').then(snap => {
+            const loans = snap.val();
+            let html = '';
+            if (loans) {
+                html = '<ul style="margin:0 0 0 1.2em;padding:0;">';
+                Object.values(loans).forEach(loan => {
+                    html += `<li>Amount: $${parseFloat(loan.amount).toFixed(2)}, Term: ${loan.term}m, Rate: ${(loan.rate*100).toFixed(2)}%</li>`;
+                });
+                html += '</ul>';
+            } else {
+                html = '<span style="color:#888">None</span>';
+            }
+            document.getElementById('loansList').innerHTML = '<b>Loans:</b> ' + html;
+        });
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.firebase && firebase.auth) {
+            firebase.auth().onAuthStateChanged(function(user) {
+                if (user) {
+                    processMaturedDeposits().then(() => {
+                        showCurrentDepositsAndLoans();
+                        populateRepayLoanOptions();
+                    });
+                }
+            });
+        }
+    });
+    </script>
+</body>
+</html>
