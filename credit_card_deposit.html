@@ -313,7 +313,7 @@
     <h1>Enter Your Payment Information</h1>
     <form class="rounded-boxes">
         <h2 id="successMessage"></h2>
-        <label for="gg" style="font-weight: bolder; font-size: x-large;">Tush Bank Co, Ltd.</label>
+        <label for="gg" style="font-weight: bolder; font-size: x-large;">TushTV Co LTD</label>
         <br>
         <br>
         <label for="message" id="depositAmountLabel" style="font-size: larger; font-weight: 500; background-color: #ffde92; opacity: 90% ;">$2.99</label>
@@ -734,6 +734,7 @@
             window.opener.postMessage({ type: 'deposit-success', amount, uid }, '*');
         }
     }
+    // Do NOT update balance or record transaction here. Only notify parent.
 </script>
 
 </html>
