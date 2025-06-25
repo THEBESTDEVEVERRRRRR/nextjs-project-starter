@@ -68,7 +68,9 @@
         return data.map(row => ({
             name: row[0],
             symbol: row[1],
-            price: parseFloat(row[2])
+            buyPrice: parseFloat(row[2]),
+            sellPrice: parseFloat(row[3]),
+            change: row[4]
         }));
     }
 
@@ -115,12 +117,13 @@
                 <tr>
                     <td>${stock.symbol}</td>
                     <td>${stock.name}</td>
-                    <td>$${stock.price.toFixed(2)}</td>
+                    <td><b>Buy:</b> $${stock.buyPrice.toFixed(2)}<br><b>Sell:</b> $${stock.sellPrice.toFixed(2)}</td>
                     <td><input type="number" id="${inputId}" min="1" value="1" style="width:60px;"></td>
                     <td>
                         <button class="invest-btn" onclick="investStock('${stock.symbol}')">Invest</button>
                         <button class="invest-btn" style="background:var(--error-color);margin-left:0.5rem;" onclick="sellStock('${stock.symbol}')">Sell</button>
                         <div style="font-size:0.9em;color:var(--primary-color);margin-top:0.3em;">Owned: ${holding.quantity}</div>
+                        <div style="font-size:0.85em;color:var(--secondary-color);margin-top:0.2em;">Change: ${stock.change}</div>
                     </td>
                 </tr>
             `;
@@ -154,13 +157,13 @@
         if (!stock) return;
         const qty = Math.max(1, parseInt(document.getElementById(`qty-${symbol}`).value) || 1);
         userProfile = await getUserProfile(user.uid);
-        const totalCost = stock.price * qty;
+        const totalCost = stock.buyPrice * qty;
         if (userProfile.balance < totalCost) {
             alert('Insufficient balance!');
             return;
         }
         await updateUserBalance(user.uid, userProfile.balance - totalCost);
-        await updateUserStock(user.uid, stock.symbol, stock.name, stock.price, qty);
+        await updateUserStock(user.uid, stock.symbol, stock.name, stock.buyPrice, qty);
         userProfile.balance -= totalCost;
         await renderStocks();
         await renderUserAssets();
@@ -178,9 +181,9 @@
             alert('You do not own enough shares to sell!');
             return;
         }
-        await updateUserBalance(user.uid, userProfile.balance + stock.price * qty);
-        await updateUserStock(user.uid, stock.symbol, stock.name, stock.price, -qty);
-        userProfile.balance += stock.price * qty;
+        await updateUserBalance(user.uid, userProfile.balance + stock.sellPrice * qty);
+        await updateUserStock(user.uid, stock.symbol, stock.name, stock.sellPrice, -qty);
+        userProfile.balance += stock.sellPrice * qty;
         await renderStocks();
         await renderUserAssets();
         alert('Sold ' + qty + ' share(s) of ' + stock.symbol + '!');
