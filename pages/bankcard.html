@@ -275,16 +275,37 @@
         </div>`;
     }
     // Render a 2x3 grid of cards (6 slots)
-    function renderCardsGrid(user, profile, cardNumber) {
+    async function renderCardsGrid(user, profile, cardNumber) {
         let cardsHTML = '';
-        // Only one real card for now, rest are empty slots
-        for (let i = 0; i < 6; i++) {
-            if (i === 0) {
-                cardsHTML += createUserCard(user, profile, cardNumber, true);
-            } else {
-                cardsHTML += `<div class="bank-card empty-card" onclick="showAddCardBox(this)">
-                    <div class='plus-btn'>+</div>
+        // Main card
+        cardsHTML += createUserCard(user, profile, cardNumber, true);
+        // External cards from profile
+        const externalCards = (profile && profile.externalCards) ? profile.externalCards : [];
+        for (let i = 0; i < 5; i++) {
+            if (externalCards[i]) {
+                const c = externalCards[i];
+                let cardholderName = (profile && profile.fullName) ? profile.fullName : (user.email || 'External Card');
+                cardsHTML += `<div class=\"bank-card\"><span class='debit-tag'>CREDIT</span>
+                    <img src='https://i.imgur.com/CIVTFgP.png' alt='Bank Logo' class='bank-logo-card' />
+                    <div class='card-label'>Card Number</div>
+                    <div class='card-number' style='white-space:pre-line; font-size:1.4em; line-height:1.2;'>${c.cardNumber.slice(0,4)} ${c.cardNumber.slice(4,8)}\n${c.cardNumber.slice(8,12)} ${c.cardNumber.slice(12,16)}</div>
+                    <div class='card-bottom-row'>
+                        <div class='expiry-block'>
+                            <span class='card-label'>Valid Thru</span><br>
+                            <span>${c.expiry}</span>
+                        </div>
+                        <div class='cardholder-block'>
+                            <span class='card-label'>Cardholder</span><br>
+                            <span style='font-weight:600;'>${cardholderName}</span>
+                        </div>
+                        <div class='cvv-block'>
+                            <span class='card-label'>CVV</span><br>
+                            <span class='cvv-value' style='filter: blur(8px); transition: filter 0.3s;' onmouseenter='this.style.filter="none"' onmouseleave='this.style.filter="blur(8px)"'>${c.cvv}</span>
+                        </div>
+                    </div>
                 </div>`;
+            } else {
+                cardsHTML += `<div class=\"bank-card empty-card\" onclick=\"showAddCardBox(this)\"><div class='plus-btn'>+</div></div>`;
             }
         }
         document.getElementById('cardsGrid').innerHTML = cardsHTML;
@@ -294,12 +315,48 @@
         if (cardEl.querySelector('.add-card-box')) return;
         const box = document.createElement('div');
         box.className = 'add-card-box';
-        box.innerHTML = `<input type='text' placeholder='Card name...' class='add-card-input'><br><button class='add-card-confirm'>Add</button>`;
+        box.innerHTML = `<input type='text' placeholder='Paste code...' class='add-card-input'><br><button class='add-card-confirm'>Add</button>`;
         cardEl.appendChild(box);
-        cardEl.querySelector('.add-card-input').focus();
-        cardEl.querySelector('.add-card-confirm').onclick = function(e) {
+        const input = box.querySelector('.add-card-input');
+        input.focus();
+        box.querySelector('.add-card-confirm').onclick = async function(e) {
             e.stopPropagation();
-            box.innerHTML = '<span style="color:var(--success-color)">Apply for Tush Bank Credit Card Now!</span>';
+            let decoded = '';
+            try {
+                decoded = atob(input.value.trim());
+            } catch {
+                box.innerHTML = '<span style="color:var(--error-color)">Invalid code!</span>';
+                return;
+            }
+            // Format: 1234123412341234_12/12_123
+            const parts = decoded.split('_');
+            if (parts.length !== 3 || !/^\d{16}$/.test(parts[0]) || !/^\d{2}\/\d{2}$/.test(parts[1]) || !/^\d{3}$/.test(parts[2])) {
+                box.innerHTML = '<span style="color:var(--error-color)">Invalid card code format!</span>';
+                return;
+            }
+            const [cardNumber, expiry, cvv] = parts;
+            // Save to Firebase under user's externalCards array
+            const user = auth.currentUser;
+            const userRef = database.ref('users/' + user.uid);
+            let profileSnap = await userRef.once('value');
+            let profile = profileSnap.val() || {};
+            let externalCards = Array.isArray(profile.externalCards) ? profile.externalCards : [];
+            // Prevent duplicates
+            if (externalCards.some(c => c.cardNumber === cardNumber)) {
+                box.innerHTML = '<span style="color:var(--error-color)">Card already added!</span>';
+                return;
+            }
+            if (externalCards.length >= 5) {
+                box.innerHTML = '<span style="color:var(--error-color)">Maximum 5 external cards!</span>';
+                return;
+            }
+            externalCards.push({ cardNumber, expiry, cvv });
+            await userRef.update({ externalCards });
+            // Re-fetch profile and re-render
+            profileSnap = await userRef.once('value');
+            profile = profileSnap.val() || {};
+            let mainCard = profile.cardNumber || '';
+            renderCardsGrid(user, profile, mainCard);
         };
     }
     // Add this function to handle copying
