@@ -162,7 +162,7 @@ async function initializeUserAccount(userId, userData) {
     try {
         await database.ref('users/' + userId).set({
             ...userData,
-            balance: 1000, // Initial balance
+            balance: 0, // Initial balance
             createdAt: firebase.database.ServerValue.TIMESTAMP
         });
         return true;
