@@ -1,177 +1,496 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Tush Bank - Welcome</title>
-    <link rel="stylesheet" href="css/styles.css" />
-    <style>
-        /* Additional landing page specific styles */
-        body {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-color);
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tush Bank - Next Generation Banking</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <!-- No 3D scripts included -->
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    /* Page-specific styles (structure, layout, overrides) */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--background-color);
+      color: var(--text-color);
+      line-height: 1.5;
+      overflow-x: hidden;
+      transition: background 0.3s, color 0.3s;
+    }
+    /* Dark mode support */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --background-color: #181f2a;
+        --background-alt: #232b3a;
+        --text-color: #f1f5f9;
+        --text-secondary: #cbd5e1;
+        --primary-color: #3b82f6;
+        --primary-dark: #2563eb;
+        --primary-light: #60a5fa;
+        --secondary-color: #64748b;
+        --border-color: #334155;
+        --card-bg: #232b3a;
+        --navbar-bg: #232b3a;
+        --navbar-text: #f1f5f9;
+        --navbar-link: #cbd5e1;
+        --footer-bg: #181f2a;
+        --footer-text: #f1f5f9;
+        --footer-link: #93c5fd;
+      }
+      body {
+        background: var(--background-color);
+        color: var(--text-color);
+      }
+      .feature-card, .service-card {
+        background: var(--background-alt);
+        color: var(--text-color);
+        border-color: var(--border-color);
+      }
+      .footer-section a:hover { color: #fff; }
+    }
+    .navbar {
+      position: fixed; top: 0; left: 0; width: 100%; z-index: 100;
+      background: var(--navbar-bg, rgba(255,255,255,0.95));
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.5rem 2rem;
+      color: var(--navbar-text, var(--text-color));
+    }
+    .logo { font-size: 1.7rem; font-weight: 700; color: var(--primary-color); text-decoration: none; }
+    .nav-links { display: flex; gap: 2rem; }
+    .nav-links a {
+      text-decoration: none; color: var(--navbar-link, var(--text-secondary)); font-weight: 500; position: relative;
+      transition: color 0.3s;
+    }
+    .nav-links a:hover { color: var(--primary-color); }
+    .cta-buttons { display: flex; gap: 1rem; }
+    .btn {
+      padding: 0.75rem 1.5rem; border: none; border-radius: 0.75rem; font-weight: 600;
+      cursor: pointer; font-size: 1rem; transition: all 0.3s;
+    }
+    .btn-primary {
+      background: var(--primary-color); color: #fff;
+      box-shadow: 0 4px 6px rgba(37,99,235,0.15);
+    }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-secondary {
+      background: transparent; color: var(--primary-color); border: 2px solid var(--primary-color);
+    }
+    .btn-secondary:hover { background: var(--primary-color); color: #fff; }
+    main { padding-top: 100px; }
+    .hero {
+      min-height: 102vh;
+      height: 102vh;
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      justify-content: flex-start;
+      position: relative;
+      text-align: left;
+      padding: 0 1rem;
+      overflow: hidden;
+    }
+    .hero-content {
+      flex: 1 1 0%;
+      max-width: 640px;
+      position: relative;
+      z-index: 1;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      min-height: 70vh;
+      padding-left: 0.1vw;
+      margin-top: 7vh;
+    }
+    .hero-content h1 {
+      font-size: 4.2rem;
+      font-weight: 900;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: var(--primary-color);
+      text-align: left;
+      /* Only use gradient text in dark mode */
+    }
+    @media (prefers-color-scheme: dark) {
+      .hero-content h1 {
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+      }
+    }
+    .hero-content p {
+      font-size: 1.7rem;
+      color: var(--text-secondary);
+      margin-bottom: 2.5rem;
+      text-align: left;
+    }
+    #three-container {
+      flex: 1 1 0%;
+      width: 100vw;
+      max-width: none;
+      height: 100vh;
+      min-width: 0;
+      min-height: 0;
+      position: absolute;
+      top: 0;
+      right: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 0;
+      margin: 0;
+      border-radius: 0;
+      box-shadow: none;
+      overflow: visible;
+      background: transparent;
+      display: block;
+    }
+    @media (max-width: 900px) {
+      .hero {
+        flex-direction: column;
+        text-align: left;
+        min-height: 100vh;
+        height: 100vh;
+        padding: 0 0.5rem;
+      }
+      .hero-content {
+        align-items: flex-start;
+        max-width: 100%;
+        margin-bottom: 2rem;
+        padding-left: 0;
+      }
+      #three-container {
+        width: 100vw;
+        max-width: none;
+        height: 60vh;
+        min-width: 0;
+        min-height: 0;
+        position: static;
+        margin: 0;
+        border-radius: 0;
+        box-shadow: none;
+        overflow: visible;
+        background: transparent;
+        display: block;
+      }
+    }
+    @media (prefers-color-scheme: dark) {
+      #three-container {
+        background: transparent !important;
+      }
+    }
+    .features, .services {
+      padding: 6rem 1rem 4rem 1rem; background: var(--background-color);
+    }
+    @media (prefers-color-scheme: dark) {
+      .features, .services {
+        background: var(--background-alt) !important;
+      }
+    }
+    .features h2, .services h2 {
+      text-align: center; font-size: 2.3rem; margin-bottom: 3rem; color: var(--primary-color);
+    }
+    .feature-grid, .services-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 2rem; max-width: 1100px; margin: 0 auto;
+    }
+        .feature-card, .service-card {
+        background: var(--card-bg, #fff);
+        border-radius: 1.2rem;
+        box-shadow: 0 6px 24px rgba(0,0,0,0.06);
+        padding: 2.2rem 1.5rem;
+        border: 1px solid var(--border-color);
+        transition: box-shadow 0.3s, transform 0.3s;
         }
-        .bank-logo {
-            height: 40px;
-            margin-right: 1rem;
-            vertical-align: middle;
-            transition: filter 0.2s;
-        }
-        @media (prefers-color-scheme: dark) {
-            .bank-logo {
-                content: url('https://i.ibb.co/wF5k1t3v/tblogowhite.png');
-            }
-            nav.landing-nav, .hero, .feature-card, footer {
-                background: var(--background-color) !important;
-                color: var(--text-color) !important;
-            }
-        }
-        nav.landing-nav {
-            background: var(--background-color);
-            padding: 1rem 2rem;
-            box-shadow: var(--card-shadow);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        nav.landing-nav .brand {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-        nav.landing-nav ul {
-            list-style: none;
-            display: flex;
-            gap: 2rem;
-        }
-        nav.landing-nav ul li a {
-            text-decoration: none;
-            color: var(--text-color);
-            font-weight: 500;
-            transition: color 0.2s;
-        }
-        nav.landing-nav ul li a:hover {
-            color: var(--primary-color);
-        }
-        .hero {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 4rem 2rem;
-            background: var(--background-color);
-            margin: 2rem auto;
-            max-width: 900px;
-            border-radius: 1rem;
-            box-shadow: var(--card-shadow);
-        }
-        .hero h1 {
-            font-size: 3rem;
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-        }
-        .hero p {
-            font-size: 1.25rem;
-            margin-bottom: 2rem;
-            max-width: 600px;
-            color: var(--text-color);
-        }
-        .btn-primary.landing-cta {
-            max-width: 200px;
-            font-size: 1.25rem;
-            padding: 1rem 2rem;
-            border-radius: 0.75rem;
-            cursor: pointer;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            transition: background-color 0.2s;
-            text-decoration: none;
-            display: inline-block;
-        }
-        .btn-primary.landing-cta:hover {
-            background-color: var(--secondary-color);
-        }
-        .features {
-            max-width: 900px;
-            margin: 0 auto 4rem auto;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            padding: 0 2rem;
-        }
-        .feature-card {
-            background: var(--background-color);
-            padding: 2rem;
-            border-radius: 1rem;
-            box-shadow: var(--card-shadow);
-            text-align: center;
-        }
-        .feature-card h3 {
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-        }
-        .feature-card p {
-            color: var(--text-color);
-            font-size: 1rem;
-        }
-        footer {
-            background: var(--background-color);
-            padding: 1rem 2rem;
-            text-align: center;
-            box-shadow: var(--card-shadow);
-            font-size: 0.9rem;
-            color: #64748b;
-        }
-        @media (max-width: 600px) {
-            .hero h1 {
-                font-size: 2.25rem;
-            }
-            .hero p {
-                font-size: 1rem;
-            }
-        }
-    </style>
+    .feature-card:hover, .service-card:hover {
+      box-shadow: 0 12px 32px rgba(37,99,235,0.13); transform: translateY(-8px);
+      border-color: var(--primary-color);
+    }
+    .feature-card h3, .service-card h3 { font-size: 1.3rem; margin-bottom: 0.7rem; color: var(--text-color); }
+    .feature-card p, .service-card p { color: var(--text-secondary); font-size: 1.05rem; }
+    footer {
+      background: var(--footer-bg, var(--primary-color));
+      color: var(--footer-text, #fff);
+      padding: 4rem 1rem 2rem 1rem;
+    }
+    .footer-content {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 2.5rem; max-width: 1100px; margin: 0 auto;
+    }
+    .footer-section h4 { margin-bottom: 1.2rem; font-size: 1.1rem; color: var(--footer-text, #fff); }
+    .footer-section a { color: var(--footer-link, #dbeafe); text-decoration: none; display: block; margin-bottom: 0.7rem; }
+    .footer-section a:hover { color: #fff; }
+    .footer-bottom { text-align: center; margin-top: 2.5rem; color: var(--footer-link, #dbeafe); font-size: 0.95rem; }
+    @media (max-width: 700px) {
+      .navbar { flex-direction: column; padding: 1rem; }
+      .nav-links { gap: 1rem; }
+      .hero-content h1 { font-size: 2rem; }
+      .feature-grid, .services-grid { grid-template-columns: 1fr; }
+      #three-container { height: 220px; }
+    }
+.icon {
+  font-size: 2.5rem; margin-bottom: 1.2rem;
+  display: inline-block;
+}
+    .bank-logo {
+      height: 40px;
+      margin-right: 1rem;
+      vertical-align: middle;
+      transition: filter 0.2s;
+    }
+    @media (prefers-color-scheme: dark) {
+      .bank-logo {
+        content: url('https://i.ibb.co/wF5k1t3v/tblogowhite.png');
+      }
+    }
+  </style>
 </head>
 <body>
-    <nav class="landing-nav">
-        <img src="https://i.ibb.co/G4KHQNw2/tblogoblack.png" alt="Bank Logo" class="bank-logo" />
-        <ul>
-            <li><a href="login.html">Login</a></li>
-            <li><a href="signup.html">Sign Up</a></li>
-        </ul>
-    </nav>
+  <div class="loading">Loading...</div>
+  <nav class="navbar">
+    <div style="display: flex; align-items: center; gap: 1rem;">
+      <img src="https://i.ibb.co/G4KHQNw2/tblogoblack.png" alt="Tush Bank Logo" class="bank-logo" style="height:40px;vertical-align:middle;transition:filter 0.2s;" />
+      <a href="#" class="logo" style="font-size:1.7rem;font-weight:700;color:var(--primary-color);text-decoration:none;"></a>
+    </div>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#services">Services</a>
+      <a href="#about">About</a>
+    </div>
+    <div class="cta-buttons">
+      <a href="login.html"><button class="btn btn-secondary">Login</button></a>
+      <a href="signup.html"><button class="btn btn-primary">Sign Up</button></a>
+    </div>
 
+  </nav>
+  <main>
     <section class="hero">
-        <h1>Welcome to Tush Bank</h1>
-        <p>Your trusted partner for secure, fast, and easy banking. Manage your finances anytime, anywhere.</p>
-        <a href="signup.html" class="btn-primary landing-cta">Get Started</a>
+      <div class="hero-content" style="align-items: flex-start; text-align: left; justify-content: flex-start;">
+        <h1 style="text-align: left; align-self: flex-start;">Banking for the Digital Age</h1>
+        <p style="text-align: left; align-self: flex-start;">Experience seamless, secure, and smart banking solutions for everyone.</p>
+        <a href="signup.html" style="align-self: flex-start;"><button class="btn btn-primary btn-large">Get Started</button></a>
+      </div>
+      <div id="three-container"></div>
     </section>
-
-    <section class="features">
-        <div class="feature-card">
-            <h3>Secure Transactions</h3>
-            <p>Bank with confidence knowing your data and money are protected with top-notch security measures.</p>
+    <section id="features" class="features">
+      <h2>Why Choose Us</h2>
+      <div class="feature-grid">
+        <div class="feature-card service-card"><div class="icon">🔒</div><h3>Bank-Grade Security</h3><p>Advanced encryption, 2FA, and real-time fraud monitoring keep your money and data safe.</p></div>
+        <div class="feature-card service-card"><div class="icon">📱</div><h3>Mobile Experience</h3><p>Seamless, intuitive app for banking, payments, and investing—anytime, anywhere.</p></div>
+        <div class="feature-card service-card"><div class="icon">⚡</div><h3>Instant Transactions</h3><p>Send and receive money instantly, pay bills, and manage cards with just a tap.</p></div>
+        <div class="feature-card service-card">
+            <div class="icon">💸</div>
+            <h3>No Monthly Fees</h3>
+            <p>Enjoy full access to all banking features with zero monthly maintenance charges—no hidden costs, ever.</p>
         </div>
-        <div class="feature-card">
-            <h3>Easy Transfers</h3>
-            <p>Send money quickly and easily to anyone, anytime, with just a few clicks.</p>
-        </div>
-        <div class="feature-card">
-            <h3>24/7 Support</h3>
-            <p>Our dedicated support team is here to help you around the clock with any questions or issues.</p>
-        </div>
+      </div>
     </section>
-
-    <footer>
-        &copy; 2025 Tush Bank. All rights reserved.<br>
-        <a href="tos.html">Terms of Service</a> &middot; <a href="privacy.html">Privacy Policy</a> &middot; <a href="contact_us.html">Contact Us</a>
-    </footer>
+    <section id="services" class="services">
+      <h2>What We Offer</h2>
+      <div class="feature-grid">
+        <div class="feature-card service-card"><div class="icon">👤</div><h3>Personal Banking</h3><p>Modern accounts, cards, and tools for everyday banking—tailored to your lifestyle.</p></div>
+        <div class="feature-card service-card"><div class="icon">🏢</div><h3>Business Solutions</h3><p>Smart business accounts, payments, and expense management for companies of all sizes.</p></div>
+        <div class="feature-card service-card"><div class="icon">📈</div><h3>Investments</h3><p>Grow your wealth with curated portfolios, auto-invest, and real-time market insights.</p></div>
+        <div class="feature-card service-card"><div class="icon">💬</div><h3>Support 24/7</h3><p>Get help from real people, anytime—via chat, phone, or email.</p></div>
+      </div>
+    </section>
+    <section id="about" class="features" style="background: var(--background-alt);">
+      <h2>About Tush Bank</h2>
+      <div style="max-width:700px;margin:0 auto;text-align:center;font-size:1.1rem;color:var(--text-secondary);padding:2rem 0 0 0;">Tush Bank is a next-generation digital bank, built for speed, security, and simplicity. We believe everyone deserves access to powerful financial tools—without the complexity or hidden fees.</div>
+    </section>
+  </main>
+  <footer>
+    <div class="footer-content">
+      <div class="footer-section">
+        <h4>Tush Bank</h4>
+        <p>Banking for the future</p>
+      </div>
+      <div class="footer-section">
+        <h4>Quick Links</h4>
+        <a href="tos.html">Terms of Service</a>
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="contact_us.html">Contact Us</a>
+      </div>
+      <div class="footer-section">
+        <h4>Contact</h4>
+        <p>support@bank.tush.my.id</p>
+        <p>1-800-TUSH-BANK</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 Tush Bank. All rights reserved.</p>
+    </div>
+  </footer>
+  <script src="js/three.min.js"></script>
+  <script>
+    // Hide loading overlay when DOM is ready
+    document.addEventListener('DOMContentLoaded', function() {
+      var loading = document.querySelector('.loading');
+      if (loading) loading.style.display = 'none';
+      // Interactive 3D bank card with dots in a sphere using Three.js
+      const container = document.getElementById('three-container');
+      if (container && window.THREE) {
+        // Scene setup
+        const scene = new THREE.Scene();
+        scene.background = null;
+        // Camera
+        const camera = new THREE.PerspectiveCamera(60, container.offsetWidth/container.offsetHeight, 0.1, 1000);
+        camera.position.set(0, 0, 5);
+        // Renderer
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setClearColor(0x000000, 0);
+        renderer.setSize(container.offsetWidth, container.offsetHeight);
+        renderer.domElement.style.position = 'absolute';
+        renderer.domElement.style.inset = 0;
+        renderer.domElement.style.width = '100%';
+        renderer.domElement.style.height = '100%';
+        container.appendChild(renderer.domElement);
+        // Lighting
+        scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+        const dirLight = new THREE.DirectionalLight(0x3b82f6, 1.1);
+        dirLight.position.set(5, 10, 7.5);
+        scene.add(dirLight);
+        // Bank card (rounded edges using ExtrudeGeometry for correct proportions)
+        function createRoundedRectShape(width, height, radius) {
+          // Proper outward-rounded rectangle (corners bulge out)
+          const shape = new THREE.Shape();
+          const w = width, h = height, r = Math.min(radius, width/2, height/2);
+          // Start at top-left corner, move clockwise, arcs drawn counter-clockwise (true)
+          shape.moveTo(-w/2 + r, h/2);
+          shape.lineTo(w/2 - r, h/2);
+          shape.absarc(w/2 - r, h/2 - r, r, Math.PI/2, 0, true); // top-right
+          shape.lineTo(w/2, -h/2 + r);
+          shape.absarc(w/2 - r, -h/2 + r, r, 0, -Math.PI/2, true); // bottom-right
+          shape.lineTo(-w/2 + r, -h/2);
+          shape.absarc(-w/2 + r, -h/2 + r, r, -Math.PI/2, -Math.PI, true); // bottom-left
+          shape.lineTo(-w/2, h/2 - r);
+          shape.absarc(-w/2 + r, h/2 - r, r, -Math.PI, -Math.PI*1.5, true); // top-left
+          shape.closePath();
+          return shape;
+        }
+        const cardWidth = 2.56, cardHeight = 1.6, cardRadius = 0.18, cardDepth = 0.08;
+        // Scale down card and sphere
+        const scaleFactor = 0.7;
+        const cardShape = createRoundedRectShape(cardWidth * scaleFactor, cardHeight * scaleFactor, cardRadius * scaleFactor);
+        const extrudeSettings = {
+          depth: cardDepth * scaleFactor,
+          bevelEnabled: false,
+          steps: 1
+        };
+        const cardGeometry = new THREE.ExtrudeGeometry(cardShape, extrudeSettings);
+        cardGeometry.center();
+        const cardMaterial = new THREE.MeshPhysicalMaterial({
+          color: 0x2563eb,
+          metalness: 0.45,
+          roughness: 0.18,
+          clearcoat: 0.8,
+          clearcoatRoughness: 0.12,
+          transmission: 0.15,
+          thickness: 0.2,
+          iridescence: 0.2,
+          sheen: 0.2,
+          emissive: 0x3b82f6,
+          emissiveIntensity: 0.08,
+        });
+        const card = new THREE.Mesh(cardGeometry, cardMaterial);
+        card.castShadow = false;
+        card.receiveShadow = false;
+        scene.add(card);
+        // Card details (chip, logo, number) as simple shapes
+        const chipGeometry = new THREE.BoxGeometry(0.22, 0.16, 0.02);
+        const chipMaterial = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.7, roughness: 0.3 });
+        const chip = new THREE.Mesh(
+          new THREE.BoxGeometry(0.22 * scaleFactor, 0.16 * scaleFactor, 0.02 * scaleFactor),
+          chipMaterial
+        );
+        chip.position.set(-0.95 * scaleFactor, 0.45 * scaleFactor, 0.05 * scaleFactor);
+        card.add(chip);
+        // Dots in a sphere formation
+        const dots = [];
+        const dotGeometry = new THREE.SphereGeometry(0.032 * scaleFactor, 10, 10); // smaller dots
+        const dotMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0x60a5fa, emissiveIntensity: 0.7 });
+        const sphereRadius = 3.5 * scaleFactor; // smaller sphere
+        const dotCount = 38;
+        for (let i = 0; i < dotCount; i++) {
+          const phi = Math.acos(-1 + (2 * i) / dotCount);
+          const theta = Math.PI * (1 + Math.sqrt(5)) * i;
+          const x = sphereRadius * Math.cos(theta) * Math.sin(phi);
+          const y = sphereRadius * Math.sin(theta) * Math.sin(phi);
+          const z = sphereRadius * Math.cos(phi);
+          const dot = new THREE.Mesh(dotGeometry, dotMaterial.clone());
+          dot.position.set(x, y, z);
+          scene.add(dot);
+          dots.push(dot);
+        }
+        // Mouse/touch interactivity: card follows cursor, dots orbit
+        let mouseX = 0, mouseY = 0;
+        let targetRotationY = 0, targetRotationX = 0;
+        let currentRotationY = 0, currentRotationX = 0;
+        // Listen for pointer movement (no drag required)
+        function onPointerMove(e) {
+          let x, y;
+          if (e.touches && e.touches.length > 0) {
+            x = e.touches[0].clientX;
+            y = e.touches[0].clientY;
+          } else {
+            x = e.clientX;
+            y = e.clientY;
+          }
+          const rect = renderer.domElement.getBoundingClientRect();
+          // Normalize to [-1, 1]
+          mouseX = ((x - rect.left) / rect.width) * 2 - 1;
+          mouseY = -(((y - rect.top) / rect.height) * 2 - 1);
+        }
+        renderer.domElement.addEventListener('pointermove', onPointerMove);
+        renderer.domElement.addEventListener('touchmove', onPointerMove, { passive: false });
+        // Animate dots orbiting and card following cursor
+        let t = 0;
+        function animate() {
+          requestAnimationFrame(animate);
+          t += 0.012;
+          // Card follows mouse (smoothly)
+          const targetY = mouseX * 0.8;
+          const targetX = mouseY * 0.5;
+          currentRotationY += (targetY - currentRotationY) * 0.08;
+          currentRotationX += (targetX - currentRotationX) * 0.08;
+          card.rotation.y = currentRotationY;
+          card.rotation.x = currentRotationX * 0.7;
+          // Sphere spins like the earth (constant rotation)
+          const sphereRotationY = t * 0.5; // longitude (east-west)
+          const sphereRotationX = t * 0.15; // latitude (north-south, subtle)
+          for (let i = 0; i < dots.length; i++) {
+            const phi = Math.acos(-1 + (2 * i) / dotCount);
+            const theta = Math.PI * (1 + Math.sqrt(5)) * i;
+            // Apply rotation to the sphere
+            // Spherical to Cartesian, then rotate
+            let x = sphereRadius * Math.cos(theta) * Math.sin(phi);
+            let y = sphereRadius * Math.sin(theta) * Math.sin(phi);
+            let z = sphereRadius * Math.cos(phi);
+            // Rotate around Y (like earth's axis)
+            const cosY = Math.cos(sphereRotationY), sinY = Math.sin(sphereRotationY);
+            let x1 = x * cosY - z * sinY;
+            let z1 = x * sinY + z * cosY;
+            // Rotate around X (for a subtle tilt)
+            const cosX = Math.cos(sphereRotationX), sinX = Math.sin(sphereRotationX);
+            let y1 = y * cosX - z1 * sinX;
+            let z2 = y * sinX + z1 * cosX;
+            dots[i].position.set(x1, y1, z2);
+          }
+          renderer.render(scene, camera);
+        }
+        animate();
+        // Responsive resize
+        window.addEventListener('resize', () => {
+          const w = container.offsetWidth, h = container.offsetHeight;
+          camera.aspect = w / h;
+          camera.updateProjectionMatrix();
+          renderer.setSize(w, h);
+        });
+      }
+    });
+  </script>
 </body>
 </html>
